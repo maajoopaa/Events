@@ -24,5 +24,7 @@ namespace Events.Domain.Entities
         public int MaxCountOfParticipant { get; set; } = 0;
 
         public ICollection<ParticipantEntity> Participants { get; set; } = [];
+
+        public string? Image { get; set; }
     }
 }
