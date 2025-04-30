@@ -9,6 +9,16 @@ namespace Events.Domain.Models
 {
     public class Participant
     {
+        public Participant(Guid id, string firstName, string lastName, DateTime dateOfBirth, DateTime dateOfRegistry, string email)
+        {
+            Id = id;
+            FirstName = firstName;
+            LastName = lastName;
+            DateOfBirth = dateOfBirth;
+            DateOfRegistry = dateOfRegistry;
+            Email = email;
+        }
+
         public Guid Id { get; }
 
         public string FirstName { get; }

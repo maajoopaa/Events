@@ -8,6 +8,19 @@ namespace Events.Domain.Models
 {
     public class Event
     {
+        public Event(Guid id, string title, string description, DateTime holdedAt, string venue, Category category,
+            int maxCountOfParticipant, List<Participant> participants)
+        {
+            Id = id;
+            Title = title;
+            Description = description;
+            HoldedAt = holdedAt;
+            Venue = venue;
+            Category = category;
+            MaxCountOfParticipant = maxCountOfParticipant;
+            Participants = participants;
+        }
+
         public Guid Id { get; }
 
         public string Title { get; }
