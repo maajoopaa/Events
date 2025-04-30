@@ -18,7 +18,8 @@ namespace Events.Application
                     src.Venue,
                     src.Category,
                     src.MaxCountOfParticipant,
-                    context.Mapper.Map<List<Participant>>(src.Participants)
+                    context.Mapper.Map<List<Participant>>(src.Participants),
+                    src.Image
                     ));
 
             CreateMap<ParticipantEntity, Participant>();
