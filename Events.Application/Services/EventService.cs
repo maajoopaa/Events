@@ -100,7 +100,7 @@ namespace Events.Application.Services
             {
                 var entites = await _eventsRepository.GetAllAsync();
 
-                var entity = entites.FirstOrDefault(x => x.Title.ToLower() == title.ToLower());
+                var entity = entites.FirstOrDefault(x => x.Title.ToLower().Contains(title.ToLower()));
 
                 return new ServiceResponse<Event?>
                 {
