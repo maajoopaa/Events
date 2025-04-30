@@ -23,6 +23,6 @@ namespace Events.Domain.Entities
 
         public int MaxCountOfParticipant { get; set; } = 0;
 
-        public List<Participant> Participants { get; set; } = [];
+        public ICollection<ParticipantEntity> Participants { get; set; } = [];
     }
 }
