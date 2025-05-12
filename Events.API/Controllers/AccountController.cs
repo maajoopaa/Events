@@ -1,5 +1,5 @@
-﻿using Events.Application.Models;
-using Events.Application.Services.AccountService;
+﻿using Events.Application.Interfaces;
+using Events.Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +17,9 @@ namespace Events.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromBody] ParticipantLoginRequest model)
+        public IActionResult LoginAsync([FromBody] ParticipantLoginRequest model)
         {
-            var response = await _accountService.Login(model);
+            var response = _accountService.Login(model);
 
             return response.Success ? Ok(response.Data) : BadRequest(response.Error);
         }

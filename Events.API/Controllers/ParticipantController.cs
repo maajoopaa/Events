@@ -1,8 +1,6 @@
-﻿using Events.Application.Services;
+﻿using Events.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Events.API.Controllers
 {

@@ -1,8 +1,7 @@
-﻿using Events.Application.Models;
-using Events.Application.Services;
+﻿using Events.Application.Interfaces;
+using Events.Application.Models;
 using Events.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Events.API.Controllers
@@ -19,9 +18,9 @@ namespace Events.API.Controllers
         }
 
         [HttpGet("list")]
-        public async Task<IActionResult> GetAllAsync()
+        public IActionResult GetAllAsync()
         {
-            var response = await _eventService.GetAllAsync();
+            var response = _eventService.GetAllAsync();
 
             return response.Success ? Ok(response.Data) : BadRequest(response.Error);
         }
@@ -43,33 +42,33 @@ namespace Events.API.Controllers
         }
 
         [HttpGet("title/{title}")]
-        public async Task<IActionResult> GetByTitleAsync(string title)
+        public IActionResult GetByTitleAsync(string title)
         {
-            var response = await _eventService.GetByTitleAsync(title);
+            var response = _eventService.GetByTitleAsync(title);
 
             return response.Success ? Ok(response.Data) : BadRequest(response.Error);
         }
 
         [HttpGet("date/{date:datetime}")]
-        public async Task<IActionResult> GetByTitleAsync(DateTime date)
+        public IActionResult GetByTitleAsync(DateTime date)
         {
-            var response = await _eventService.GetByDateAsync(date);
+            var response = _eventService.GetByDateAsync(date);
 
             return response.Success ? Ok(response.Data) : BadRequest(response.Error);
         }
 
         [HttpGet("venue/{venue}")]
-        public async Task<IActionResult> GetByVenueAsync(string venue)
+        public IActionResult GetByVenueAsync(string venue)
         {
-            var response = await _eventService.GetByVenueAsync(venue);
+            var response = _eventService.GetByVenueAsync(venue);
 
             return response.Success ? Ok(response.Data) : BadRequest(response.Error);
         }
 
         [HttpGet("category/{category:int}")]
-        public async Task<IActionResult> GetByCategoryAsync(int category)
+        public IActionResult GetByCategoryAsync(int category)
         {
-            var response = await _eventService.GetByCategoryAsync((Category)category);
+            var response = _eventService.GetByCategoryAsync((Category)category);
 
             return response.Success ? Ok(response.Data) : BadRequest(response.Error);
         }
