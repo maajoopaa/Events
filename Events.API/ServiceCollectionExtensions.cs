@@ -1,14 +1,15 @@
 ﻿using Events.Application;
+using Events.Application.Interfaces;
 using Events.Application.Models;
 using Events.Application.Services;
 using Events.Application.Services.AccountService;
 using Events.Application.Validators;
 using Events.DataAccess;
 using Events.DataAccess.Repositories;
+using Events.Domain.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace Events.API
