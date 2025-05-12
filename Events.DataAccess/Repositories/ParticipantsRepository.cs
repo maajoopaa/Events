@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Events.DataAccess;
+using Events.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Events.DataAccess.Repositories
 {
@@ -18,6 +20,26 @@ namespace Events.DataAccess.Repositories
             _context = context;
         }
 
+        public async Task AddAsync(ParticipantEntity entity)
+        {
+            await _context.Participants.AddAsync(entity);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(ParticipantEntity entity)
+        {
+            _context.Participants.Remove(entity);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public IQueryable<ParticipantEntity> GetAllAsync()
+        {
+            return _context.Participants
+                .AsNoTracking();
+        }
+
         public async Task<ParticipantEntity?> GetAsync(Guid id)
         {
             return await _context.Participants
@@ -25,38 +47,11 @@ namespace Events.DataAccess.Repositories
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<List<ParticipantEntity>> GetAllAsync()
-        {
-            return await _context.Participants
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task<ParticipantEntity> AddAsync(ParticipantEntity entity)
-        {
-            await _context.Participants.AddAsync(entity);
-
-            await _context.SaveChangesAsync();
-
-            return entity;
-        }
-
-        public async Task<ParticipantEntity> UpdateAsync(ParticipantEntity entity)
+        public async Task UpdateAsync(ParticipantEntity entity)
         {
             _context.Participants.Update(entity);
 
             await _context.SaveChangesAsync();
-
-            return entity;
-        }
-
-        public async Task<Guid> DeleteAsync(ParticipantEntity entity)
-        {
-            _context.Participants.Remove(entity);
-
-            await _context.SaveChangesAsync();
-
-            return entity.Id;
         }
     }
 }

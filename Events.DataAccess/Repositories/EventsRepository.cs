@@ -1,11 +1,6 @@
 ﻿using Events.Domain.Entities;
+using Events.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Events.DataAccess.Repositories
 {
@@ -18,6 +13,26 @@ namespace Events.DataAccess.Repositories
             _context = context;
         }
 
+        public async Task AddAsync(EventEntity entity)
+        {
+            await _context.Events.AddAsync(entity);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(EventEntity entity)
+        {
+            _context.Events.Remove(entity);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public IQueryable<EventEntity> GetAllAsync()
+        {
+            return _context.Events
+                .AsNoTracking();
+        }
+
         public async Task<EventEntity?> GetAsync(Guid id)
         {
             return await _context.Events
@@ -25,38 +40,11 @@ namespace Events.DataAccess.Repositories
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<List<EventEntity>> GetAllAsync()
-        {
-            return await _context.Events
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task<EventEntity> AddAsync(EventEntity entity)
-        {
-            await _context.Events.AddAsync(entity);
-
-            await _context.SaveChangesAsync();
-
-            return entity;
-        }
-
-        public async Task<EventEntity> UpdateAsync(EventEntity entity)
-        {
-            _context.Events.Update(entity);
-
-            await _context.SaveChangesAsync();
-
-            return entity;
-        }
-
-        public async Task<Guid> DeleteAsync(EventEntity entity)
+        public async Task UpdateAsync(EventEntity entity)
         {
             _context.Events.Remove(entity);
 
             await _context.SaveChangesAsync();
-
-            return entity.Id;
         }
     }
 }
