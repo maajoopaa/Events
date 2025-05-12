@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
+using Events.Application.Interfaces;
 using Events.Application.Models;
 using Events.Domain.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Events.Application.Services.AccountService
 {
@@ -36,7 +32,7 @@ namespace Events.Application.Services.AccountService
 
                 if (response.Success)
                 {
-                    return await Login(new ParticipantLoginRequest
+                    return Login(new ParticipantLoginRequest
                     {
                         Email = model.Email,
                         Password = model.Password
@@ -57,11 +53,11 @@ namespace Events.Application.Services.AccountService
             }
         }
 
-        public async Task<ServiceResponse<AccountResponse>> Login(ParticipantLoginRequest model)
+        public ServiceResponse<AccountResponse> Login(ParticipantLoginRequest model)
         {
             try
             {
-                var response = await _participantService.GetByEmailAsync(model.Email);
+                var response = _participantService.GetByEmailAsync(model.Email);
 
                 if (response.Data is not null && PasswordHasher.Verify(model.Password, response.Data.Password))
                 {

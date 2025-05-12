@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using Events.Application.Models;
-using Events.DataAccess.Repositories;
 using Events.Domain.Entities;
 using Events.Domain.Models;
 using FluentValidation;
+using Events.Application.Interfaces;
+using Events.Domain.Interfaces;
 
 namespace Events.Application.Services
 {
@@ -23,11 +24,12 @@ namespace Events.Application.Services
             _participantService = participantService;
         }
 
-        public async Task<ServiceResponse<List<Event>>> GetAllAsync()
+        public ServiceResponse<List<Event>> GetAllAsync()
         {
             try
             {
-                var entities = await _eventsRepository.GetAllAsync();
+                var entities = _eventsRepository.GetAllAsync()
+                    .ToList();
 
                 return new ServiceResponse<List<Event>>
                 {
@@ -94,13 +96,12 @@ namespace Events.Application.Services
             }
         }
 
-        public async Task<ServiceResponse<Event?>> GetByTitleAsync(string title)
+        public ServiceResponse<Event?> GetByTitleAsync(string title)
         {
             try
             {
-                var entites = await _eventsRepository.GetAllAsync();
-
-                var entity = entites.FirstOrDefault(x => x.Title.ToLower().Contains(title.ToLower()));
+                var entity = _eventsRepository.GetAllAsync()
+                    .FirstOrDefault(x => x.Title.ToLower().Contains(title.ToLower()));
 
                 return new ServiceResponse<Event?>
                 {
@@ -117,13 +118,12 @@ namespace Events.Application.Services
             }
         }
 
-        public async Task<ServiceResponse<Event?>> GetByDateAsync(DateTime date)
+        public ServiceResponse<Event?> GetByDateAsync(DateTime date)
         {
             try
             {
-                var entites = await _eventsRepository.GetAllAsync();
-
-                var entity = entites.FirstOrDefault(x => x.HoldedAt == date);
+                var entity = _eventsRepository.GetAllAsync()
+                    .FirstOrDefault(x => x.HoldedAt == date);
 
                 return new ServiceResponse<Event?>
                 {
@@ -140,13 +140,12 @@ namespace Events.Application.Services
             }
         }
 
-        public async Task<ServiceResponse<Event?>> GetByVenueAsync(string venue)
+        public ServiceResponse<Event?> GetByVenueAsync(string venue)
         {
             try
             {
-                var entites = await _eventsRepository.GetAllAsync();
-
-                var entity = entites.FirstOrDefault(x => x.Venue.ToLower() == venue.ToLower());
+                var entity = _eventsRepository.GetAllAsync()
+                    .FirstOrDefault(x => x.Venue.ToLower() == venue.ToLower());
 
                 return new ServiceResponse<Event?>
                 {
@@ -163,13 +162,12 @@ namespace Events.Application.Services
             }
         }
 
-        public async Task<ServiceResponse<Event?>> GetByCategoryAsync(Category category)
+        public ServiceResponse<Event?> GetByCategoryAsync(Category category)
         {
             try
             {
-                var entites = await _eventsRepository.GetAllAsync();
-
-                var entity = entites.FirstOrDefault(x => x.Category == category);
+                var entity = _eventsRepository.GetAllAsync()
+                    .FirstOrDefault(x => x.Category == category);
 
                 return new ServiceResponse<Event?>
                 {

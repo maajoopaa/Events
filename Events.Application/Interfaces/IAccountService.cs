@@ -1,10 +1,10 @@
 ﻿using Events.Application.Models;
 
-namespace Events.Application.Services.AccountService
+namespace Events.Application.Interfaces
 {
     public interface IAccountService
     {
-        Task<ServiceResponse<AccountResponse>> Login(ParticipantLoginRequest model);
+        ServiceResponse<AccountResponse> Login(ParticipantLoginRequest model);
         Task<ServiceResponse<AccountResponse>> Register(ParticipantRegisterRequest model);
     }
 }

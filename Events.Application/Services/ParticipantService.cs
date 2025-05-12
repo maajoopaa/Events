@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using Events.Application.Models;
-using Events.DataAccess.Repositories;
 using Events.Domain.Models;
 using System.Net.Mail;
 using System.Net;
 using Events.Domain.Entities;
 using Events.Application.Services.AccountService;
+using Events.Application.Interfaces;
+using Events.Domain.Interfaces;
 
 namespace Events.Application.Services
 {
@@ -22,11 +23,11 @@ namespace Events.Application.Services
             _participantsRepository = participantsRepository;
         }
 
-        public async Task<ServiceResponse<ParticipantEntity>> GetByEmailAsync(string email)
+        public ServiceResponse<ParticipantEntity> GetByEmailAsync(string email)
         {
             try
             {
-                var entity = (await _participantsRepository.GetAllAsync())
+                var entity = _participantsRepository.GetAllAsync()
                     .FirstOrDefault(x => x.Email == email);
 
                 return new ServiceResponse<ParticipantEntity>
