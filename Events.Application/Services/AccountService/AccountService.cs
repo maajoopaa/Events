@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Events.Application.Exceptions;
 using Events.Application.Interfaces;
 using Events.Application.Models;
 using Events.Domain.Models;
 using FluentValidation;
+using Serilog;
 
 namespace Events.Application.Services.AccountService
 {
@@ -24,70 +26,46 @@ namespace Events.Application.Services.AccountService
 
         public async Task<ServiceResponse<AccountResponse>> Register(ParticipantRegisterRequest model)
         {
-            try
+            var result = _regValidator.Validate(model);
+
+            var response = await _participantService.AddAsync(model);
+
+            if (response.Success)
             {
-                _regValidator.ValidateAndThrow(model);
-
-                var response = await _participantService.AddAsync(model);
-
-                if (response.Success)
+                return Login(new ParticipantLoginRequest
                 {
-                    return Login(new ParticipantLoginRequest
-                    {
-                        Email = model.Email,
-                        Password = model.Password
-                    });
-                }
-
-                return new ServiceResponse<AccountResponse>
-                {
-                    Error = "Account with this email already exists"
-                };
+                    Email = model.Email,
+                    Password = model.Password
+                });
             }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<AccountResponse>
-                {
-                    Error = ex.Message
-                };
-            }
+
+            throw new ClientException("Account with this email already exists", 400);
         }
 
         public ServiceResponse<AccountResponse> Login(ParticipantLoginRequest model)
         {
-            try
+            var response = _participantService.GetByEmailAsync(model.Email);
+
+            if (response.Data is not null && PasswordHasher.Verify(model.Password, response.Data.PasswordHash))
             {
-                var response = _participantService.GetByEmailAsync(model.Email);
+                var domain = _mapper.Map<Participant>(response.Data);
 
-                if (response.Data is not null && PasswordHasher.Verify(model.Password, response.Data.Password))
+                var token = JwtService.GenerateToken(domain);
+
+                Log.Information("The user has been successfully entered the system");
+
+                return new ServiceResponse<AccountResponse>
                 {
-                    var domain = _mapper.Map<Participant>(response.Data);
-
-                    var token = JwtService.GenerateToken(domain);
-
-                    return new ServiceResponse<AccountResponse>
+                    Success = true,
+                    Data = new AccountResponse
                     {
-                        Success = true,
-                        Data = new AccountResponse
-                        {
-                            Token = token,
-                            Account = domain
-                        }
-                    };
-                }
+                        Token = token,
+                        Account = domain
+                    }
+                };
+            }
 
-                return new ServiceResponse<AccountResponse>
-                {
-                    Error = "Incorrect email or password"
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<AccountResponse>
-                {
-                    Error = ex.Message
-                };
-            }
+            throw new ClientException("Incorrect email or password", 400);
         }
     }
 }

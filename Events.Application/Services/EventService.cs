@@ -5,6 +5,8 @@ using Events.Domain.Models;
 using FluentValidation;
 using Events.Application.Interfaces;
 using Events.Domain.Interfaces;
+using Serilog;
+using Events.Application.Exceptions;
 
 namespace Events.Application.Services
 {
@@ -26,182 +28,152 @@ namespace Events.Application.Services
 
         public ServiceResponse<List<Event>> GetAllAsync()
         {
-            try
-            {
-                var entities = _eventsRepository.GetAllAsync()
+            var entities = _eventsRepository.GetAllAsync()
                     .ToList();
 
-                return new ServiceResponse<List<Event>>
-                {
-                    Success = true,
-                    Data = _mapper.Map<List<Event>>(entities)
-                };
-            }
-            catch (Exception ex)
+            Log.Information("Events were successfully received");
+
+            return new ServiceResponse<List<Event>>
             {
-                return new ServiceResponse<List<Event>>
-                {
-                    Error = ex.Message
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<List<Event>>(entities)
+            };
         }
 
         public async Task<ServiceResponse<List<Participant>>> GetParticipantsAsync(Guid eventId)
         {
-            try
-            {
-                var entity = await _eventsRepository.GetAsync(eventId);
+            var entity = await _eventsRepository.GetAsync(eventId);
 
-                if (entity is not null)
-                {
-                    return new ServiceResponse<List<Participant>>
-                    {
-                        Success = true,
-                        Data = _mapper.Map<List<Participant>>(entity.Participants)
-                    };
-                }
+            if (entity is not null)
+            {
+                Log.Information("Participants were successfully received");
 
                 return new ServiceResponse<List<Participant>>
                 {
-                    Error = "Event was not found"
+                    Success = true,
+                    Data = _mapper.Map<List<Participant>>(entity.Participants)
                 };
             }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<List<Participant>>
-                {
-                    Error = ex.Message
-                };
-            }
+
+            throw new ClientException("Event was not found", 400);
         }
 
         public async Task<ServiceResponse<Event?>> GetByIdAsync(Guid id)
         {
-            try
-            {
-                var entity = await _eventsRepository.GetAsync(id);
+            var entity = await _eventsRepository.GetAsync(id);
 
-                return new ServiceResponse<Event?>
-                {
-                    Success = true,
-                    Data = _mapper.Map<Event>(entity)
-                };
-            }
-            catch (Exception ex)
+            Log.Information("The event has been successfully received");
+
+            return new ServiceResponse<Event?>
             {
-                return new ServiceResponse<Event?>
-                {
-                    Error = ex.Message
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<Event>(entity)
+            };
         }
 
         public ServiceResponse<Event?> GetByTitleAsync(string title)
         {
-            try
-            {
-                var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAllAsync()
                     .FirstOrDefault(x => x.Title.ToLower().Contains(title.ToLower()));
 
-                return new ServiceResponse<Event?>
-                {
-                    Success = true,
-                    Data = _mapper.Map<Event>(entity)
-                };
-            }
-            catch (Exception ex)
+            Log.Information("The event has been successfully received");
+
+            return new ServiceResponse<Event?>
             {
-                return new ServiceResponse<Event?>
-                {
-                    Error = ex.Message
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<Event>(entity)
+            };
         }
 
         public ServiceResponse<Event?> GetByDateAsync(DateTime date)
         {
-            try
-            {
-                var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAllAsync()
                     .FirstOrDefault(x => x.HoldedAt == date);
 
-                return new ServiceResponse<Event?>
-                {
-                    Success = true,
-                    Data = _mapper.Map<Event>(entity)
-                };
-            }
-            catch (Exception ex)
+            Log.Information("The event has been successfully received");
+
+            return new ServiceResponse<Event?>
             {
-                return new ServiceResponse<Event?>
-                {
-                    Error = ex.Message
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<Event>(entity)
+            };
         }
 
         public ServiceResponse<Event?> GetByVenueAsync(string venue)
         {
-            try
-            {
-                var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAllAsync()
                     .FirstOrDefault(x => x.Venue.ToLower() == venue.ToLower());
 
-                return new ServiceResponse<Event?>
-                {
-                    Success = true,
-                    Data = _mapper.Map<Event>(entity)
-                };
-            }
-            catch (Exception ex)
+            Log.Information("The event has been successfully received");
+
+            return new ServiceResponse<Event?>
             {
-                return new ServiceResponse<Event?>
-                {
-                    Error = ex.Message
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<Event>(entity)
+            };
         }
 
         public ServiceResponse<Event?> GetByCategoryAsync(Category category)
         {
-            try
-            {
-                var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAllAsync()
                     .FirstOrDefault(x => x.Category == category);
 
-                return new ServiceResponse<Event?>
-                {
-                    Success = true,
-                    Data = _mapper.Map<Event>(entity)
-                };
-            }
-            catch (Exception ex)
+            Log.Information("The event has been successfully received");
+
+            return new ServiceResponse<Event?>
             {
-                return new ServiceResponse<Event?>
-                {
-                    Error = ex.Message
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<Event>(entity)
+            };
         }
 
         public async Task<ServiceResponse<Event>> AddAsync(EventRequest model)
         {
-            try
+            _validator.ValidateAndThrow(model);
+
+            var entity = new EventEntity
             {
-                _validator.ValidateAndThrow(model);
+                Title = model.Title,
+                Description = model.Description,
+                HoldedAt = model.HoldedAt,
+                Venue = model.Venue,
+                Category = model.Category,
+                MaxCountOfParticipant = model.MaxCountOfParticipant,
+                Image = model.Image,
+            };
 
-                var entity = new EventEntity
-                {
-                    Title = model.Title,
-                    Description = model.Description,
-                    HoldedAt = model.HoldedAt,
-                    Venue = model.Venue,
-                    Category = model.Category,
-                    MaxCountOfParticipant = model.MaxCountOfParticipant,
-                    Image = model.Image,
-                };
+            await _eventsRepository.AddAsync(entity);
 
-                await _eventsRepository.AddAsync(entity);
+            Log.Information("The event has been successfully added");
+
+            return new ServiceResponse<Event>
+            {
+                Success = true,
+                Data = _mapper.Map<Event>(entity)
+            };
+        }
+
+        public async Task<ServiceResponse<Event>> UpdateAsync(Guid id, EventRequest model)
+        {
+            _validator.ValidateAndThrow(model);
+
+            var entity = await _eventsRepository.GetAsync(id);
+
+            if (entity is not null)
+            {
+                entity.Title = model.Title;
+                entity.Description = model.Description;
+                entity.HoldedAt = model.HoldedAt;
+                entity.Venue = model.Venue;
+                entity.Category = model.Category;
+                entity.MaxCountOfParticipant = model.MaxCountOfParticipant;
+                entity.Image = model.Image;
+
+                await _eventsRepository.UpdateAsync(entity);
+
+                Log.Information("The event has been successfully updated");
+
+                _participantService.ReportTheChanges(entity);
 
                 return new ServiceResponse<Event>
                 {
@@ -209,87 +181,28 @@ namespace Events.Application.Services
                     Data = _mapper.Map<Event>(entity)
                 };
             }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<Event>
-                {
-                    Error = ex.Message
-                };
-            }
-        }
 
-        public async Task<ServiceResponse<Event>> UpdateAsync(Guid id, EventRequest model)
-        {
-            try
-            {
-                _validator.ValidateAndThrow(model);
-
-                var entity = await _eventsRepository.GetAsync(id);
-
-                if (entity is not null)
-                {
-                    entity.Title = model.Title;
-                    entity.Description = model.Description;
-                    entity.HoldedAt = model.HoldedAt;
-                    entity.Venue = model.Venue;
-                    entity.Category = model.Category;
-                    entity.MaxCountOfParticipant = model.MaxCountOfParticipant;
-                    entity.Image = model.Image;
-
-                    await _eventsRepository.UpdateAsync(entity);
-
-                    _participantService.ReportTheChanges(entity);
-
-                    return new ServiceResponse<Event>
-                    {
-                        Success = true,
-                        Data = _mapper.Map<Event>(entity)
-                    };
-                }
-
-                return new ServiceResponse<Event>
-                {
-                    Error = "Event was not found"
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<Event>
-                {
-                    Error = ex.Message
-                };
-            }
+            throw new ClientException("Event was not found", 400);
         }
 
         public async Task<ServiceResponse<Event>> DeleteAsync(Guid id)
         {
-            try
+            var entity = await _eventsRepository.GetAsync(id);
+
+            if (entity is not null)
             {
-                var entity = await _eventsRepository.GetAsync(id);
+                await _eventsRepository.DeleteAsync(entity);
 
-                if (entity is not null)
-                {
-                    await _eventsRepository.DeleteAsync(entity);
-
-                    return new ServiceResponse<Event>
-                    {
-                        Success = true,
-                        Data = _mapper.Map<Event>(entity)
-                    };
-                }
+                Log.Information("The event has been successfully deleted");
 
                 return new ServiceResponse<Event>
                 {
-                    Error = "Event was not found"
+                    Success = true,
+                    Data = _mapper.Map<Event>(entity)
                 };
             }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<Event>
-                {
-                    Error = ex.Message
-                };
-            }
+
+            throw new ClientException("Event was not found", 400);
         }
     }
 }

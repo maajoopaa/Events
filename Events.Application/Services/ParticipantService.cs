@@ -7,6 +7,11 @@ using Events.Domain.Entities;
 using Events.Application.Services.AccountService;
 using Events.Application.Interfaces;
 using Events.Domain.Interfaces;
+using Serilog.Core;
+using Serilog;
+using Events.Application.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Events.Application.Services
 {
@@ -25,138 +30,89 @@ namespace Events.Application.Services
 
         public ServiceResponse<ParticipantEntity> GetByEmailAsync(string email)
         {
-            try
-            {
-                var entity = _participantsRepository.GetAllAsync()
+            var entity = _participantsRepository.GetAllAsync()
                     .FirstOrDefault(x => x.Email == email);
 
-                return new ServiceResponse<ParticipantEntity>
-                {
-                    Success = true,
-                    Data = entity
-                };
-            }
-            catch (Exception ex)
+            Log.Information("The participant has been successfully received");
+
+            return new ServiceResponse<ParticipantEntity>
             {
-                return new ServiceResponse<ParticipantEntity>
-                {
-                    Error = ex.Message,
-                };
-            }
+                Success = true,
+                Data = entity
+            };
         }
 
         public async Task<ServiceResponse<Participant>> AddAsync(ParticipantRegisterRequest model)
         {
+            var entity = new ParticipantEntity
+            {
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                DateOfBirth = model.DateOfBirth,
+                DateOfRegistry = DateTime.UtcNow,
+                Email = model.Email,
+                PasswordHash = PasswordHasher.Hash(model.Password)
+            };
+
             try
             {
-                var entity = new ParticipantEntity
-                {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    DateOfBirth = model.DateOfBirth,
-                    DateOfRegistry = DateTime.UtcNow,
-                    Email = model.Email,
-                    Password = PasswordHasher.Hash(model.Password)
-                };
-
                 await _participantsRepository.AddAsync(entity);
-
-                return new ServiceResponse<Participant>
-                {
-                    Success = true,
-                    Data = _mapper.Map<Participant>(entity)
-                };
             }
-            catch (Exception ex)
+            catch(DbUpdateException ex) when 
+                (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
             {
-                return new ServiceResponse<Participant>
-                {
-                    Error = ex.Message
-                };
+                throw new ClientException("A participant with such an email already exists", 400);
             }
+
+            Log.Information("The participant has been successfully added");
+
+            return new ServiceResponse<Participant>
+            {
+                Success = true,
+                Data = _mapper.Map<Participant>(entity)
+            };
         }
 
         public async Task<ServiceResponse<Participant>> RegisterParticipationAsync(Guid participantId, Guid eventId)
         {
-            try
+            var participantEntity = await _participantsRepository.GetAsync(participantId);
+
+            if (participantEntity is not null)
             {
-                var participantEntity = await _participantsRepository.GetAsync(participantId);
+                var eventEntity = await _eventsRepository.GetAsync(eventId);
 
-                if (participantEntity is not null)
+                if (eventEntity is not null)
                 {
-                    var eventEntity = await _eventsRepository.GetAsync(eventId);
+                    participantEntity.Event = eventEntity;
 
-                    if (eventEntity is not null)
-                    {
-                        participantEntity.Event = eventEntity;
+                    await _participantsRepository.UpdateAsync(participantEntity);
 
-                        await _participantsRepository.UpdateAsync(participantEntity);
-
-                        return new ServiceResponse<Participant>
-                        {
-                            Success = true,
-                            Data = _mapper.Map<Participant>(participantEntity)
-                        };
-                    }
-
-                    return new ServiceResponse<Participant>
-                    {
-                        Error = "Event was not found"
-                    };
-                }
-
-                return new ServiceResponse<Participant>
-                {
-                    Error = "Participant was not found"
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<Participant>
-                {
-                    Error = ex.Message,
-                };
-            }
-        }
-
-        public async Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id)
-        {
-            try
-            {
-                var entity = await _participantsRepository.GetAsync(id);
-
-                if (entity is not null)
-                {
-                    entity.Event = null;
-
-                    await _participantsRepository.UpdateAsync(entity);
+                    Log.Information("Participation was successfully registered");
 
                     return new ServiceResponse<Participant>
                     {
                         Success = true,
-                        Data = _mapper.Map<Participant>(entity)
+                        Data = _mapper.Map<Participant>(participantEntity)
                     };
                 }
 
-                return new ServiceResponse<Participant>
-                {
-                    Error = "Participant was not found"
-                };
+                throw new ClientException("Event was not found", 400);
             }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<Participant>
-                {
-                    Error = ex.Message,
-                };
-            }
+
+            throw new ClientException("Participant was not found", 400);
         }
 
-        public async Task<ServiceResponse<Participant>> GetByIdAsync(Guid id)
+        public async Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id)
         {
-            try
+            var entity = await _participantsRepository.GetAsync(id);
+
+            if (entity is not null)
             {
-                var entity = await _participantsRepository.GetAsync(id);
+                entity.Event = null;
+
+                await _participantsRepository.UpdateAsync(entity);
+
+                Log.Information("Participation was successfully canceled");
 
                 return new ServiceResponse<Participant>
                 {
@@ -164,13 +120,21 @@ namespace Events.Application.Services
                     Data = _mapper.Map<Participant>(entity)
                 };
             }
-            catch (Exception ex)
+
+            throw new ClientException("Participant was not found", 400);
+        }
+
+        public async Task<ServiceResponse<Participant>> GetByIdAsync(Guid id)
+        {
+            var entity = await _participantsRepository.GetAsync(id);
+
+            Log.Information("The participant has been successfully received");
+
+            return new ServiceResponse<Participant>
             {
-                return new ServiceResponse<Participant>
-                {
-                    Error = ex.Message,
-                };
-            }
+                Success = true,
+                Data = _mapper.Map<Participant>(entity)
+            };
         }
 
         public void ReportTheChanges(EventEntity entity)
@@ -199,6 +163,8 @@ namespace Events.Application.Services
                         mailMessage.To.Add(participant.Email);
 
                         smtpClient.Send(mailMessage);
+
+                        Log.Information("Mail has been successfully sended");
                     });
                 }
             }
