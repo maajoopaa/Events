@@ -22,7 +22,7 @@ namespace Events.API.Controllers
         {
             var response = _eventService.GetAllAsync();
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("{id:guid}/participants")]
@@ -30,7 +30,7 @@ namespace Events.API.Controllers
         {
             var response = await _eventService.GetParticipantsAsync(id);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("{id:guid}")]
@@ -38,7 +38,7 @@ namespace Events.API.Controllers
         {
             var response = await _eventService.GetByIdAsync(id);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("title/{title}")]
@@ -46,7 +46,7 @@ namespace Events.API.Controllers
         {
             var response = _eventService.GetByTitleAsync(title);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("date/{date:datetime}")]
@@ -54,7 +54,7 @@ namespace Events.API.Controllers
         {
             var response = _eventService.GetByDateAsync(date);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("venue/{venue}")]
@@ -62,7 +62,7 @@ namespace Events.API.Controllers
         {
             var response = _eventService.GetByVenueAsync(venue);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("category/{category:int}")]
@@ -70,7 +70,7 @@ namespace Events.API.Controllers
         {
             var response = _eventService.GetByCategoryAsync((Category)category);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpPost, Authorize]
@@ -78,7 +78,7 @@ namespace Events.API.Controllers
         {
             var response = await _eventService.AddAsync(model);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpPut("{id:guid}"), Authorize]
@@ -86,7 +86,7 @@ namespace Events.API.Controllers
         {
             var response = await _eventService.UpdateAsync(id,model);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpDelete("{id:guid}"), Authorize]
@@ -94,7 +94,7 @@ namespace Events.API.Controllers
         {
             var response = await _eventService.DeleteAsync(id);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
     }
 }

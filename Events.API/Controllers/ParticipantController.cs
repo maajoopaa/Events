@@ -20,7 +20,7 @@ namespace Events.API.Controllers
         {
             var response = await _participantService.AbolitionParticipationAsync(id);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpPatch("{id:guid}/{eventId:guid}"), Authorize]
@@ -28,7 +28,7 @@ namespace Events.API.Controllers
         {
             var response = await _participantService.RegisterParticipationAsync(id, eventId);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpGet("{id:guid}")]
@@ -36,7 +36,7 @@ namespace Events.API.Controllers
         {
             var response = await _participantService.GetByIdAsync(id);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
     }
 }

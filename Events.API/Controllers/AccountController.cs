@@ -21,7 +21,7 @@ namespace Events.API.Controllers
         {
             var response = _accountService.Login(model);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
 
         [HttpPost("register")]
@@ -29,7 +29,7 @@ namespace Events.API.Controllers
         {
             var response = await _accountService.Register(model);
 
-            return response.Success ? Ok(response.Data) : BadRequest(response.Error);
+            return Ok(response.Data);
         }
     }
 }
