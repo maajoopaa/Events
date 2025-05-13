@@ -10,6 +10,7 @@ using Events.Domain.Interfaces;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text.Json.Serialization;
 
 namespace Events.API
@@ -67,6 +68,13 @@ namespace Events.API
         {
             services.AddControllers().AddJsonOptions(options =>
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+        }
+
+        public static void CreateLogger()
+        {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
         }
     }
 }
