@@ -1,4 +1,5 @@
 using Events.API;
+using Events.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddAuth();
 builder.Services.AddValidators();
 builder.Services.AddServices();
 builder.Services.AddJsonConverting();
+Events.API.ServiceCollectionExtensions.CreateLogger();
 
 var app = builder.Build();
 
@@ -24,7 +26,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ErrorHandlerMiddleware>();
+
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
