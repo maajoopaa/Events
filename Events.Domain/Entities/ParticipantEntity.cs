@@ -20,7 +20,7 @@ namespace Events.Domain.Entities
 
         public string Email { get; set; } = null!;
 
-        public string Password { get; set; } = null!;
+        public string PasswordHash { get; set; } = null!;
 
         public Guid? EventId { get; set; }
 
