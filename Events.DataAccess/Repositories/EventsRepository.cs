@@ -13,38 +13,38 @@ namespace Events.DataAccess.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(EventEntity entity)
+        public async Task AddAsync(EventEntity entity, CancellationToken cancellationToken = default)
         {
-            await _context.Events.AddAsync(entity);
+            await _context.Events.AddAsync(entity, cancellationToken);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeleteAsync(EventEntity entity)
+        public async Task DeleteAsync(EventEntity entity, CancellationToken cancellationToken = default)
         {
             _context.Events.Remove(entity);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public IQueryable<EventEntity> GetAllAsync()
+        public IQueryable<EventEntity> GetAll()
         {
             return _context.Events
                 .AsNoTracking();
         }
 
-        public async Task<EventEntity?> GetAsync(Guid id)
+        public async Task<EventEntity?> GetAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Events
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
-        public async Task UpdateAsync(EventEntity entity)
+        public async Task UpdateAsync(EventEntity entity, CancellationToken cancellationToken = default)
         {
             _context.Events.Remove(entity);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

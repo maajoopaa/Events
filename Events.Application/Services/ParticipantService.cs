@@ -12,6 +12,7 @@ using Serilog;
 using Events.Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using FluentValidation;
 
 namespace Events.Application.Services
 {
@@ -20,17 +21,20 @@ namespace Events.Application.Services
         private readonly IEventsRepository _eventsRepository;
         private readonly IMapper _mapper;
         private readonly IParticipantsRepository _participantsRepository;
+        private readonly IValidator<ParticipantRegisterRequest> _regValidator;
 
-        public ParticipantService(IEventsRepository eventsRepository, IMapper mapper, IParticipantsRepository participantsRepository)
+        public ParticipantService(IEventsRepository eventsRepository, IMapper mapper, IParticipantsRepository participantsRepository,
+            IValidator<ParticipantRegisterRequest> regValidator)
         {
             _eventsRepository = eventsRepository;
             _mapper = mapper;
             _participantsRepository = participantsRepository;
+            _regValidator = regValidator;
         }
 
-        public ServiceResponse<ParticipantEntity> GetByEmailAsync(string email)
+        public ServiceResponse<ParticipantEntity> GetByEmail(string email)
         {
-            var entity = _participantsRepository.GetAllAsync()
+            var entity = _participantsRepository.GetAll()
                     .FirstOrDefault(x => x.Email == email);
 
             Log.Information("The participant has been successfully received");
@@ -42,8 +46,10 @@ namespace Events.Application.Services
             };
         }
 
-        public async Task<ServiceResponse<Participant>> AddAsync(ParticipantRegisterRequest model)
+        public async Task<ServiceResponse<Participant>> AddAsync(ParticipantRegisterRequest model, CancellationToken cancellationToken = default)
         {
+            await _regValidator.ValidateAndThrowAsync(model, cancellationToken);
+
             var entity = new ParticipantEntity
             {
                 FirstName = model.FirstName,
@@ -56,10 +62,10 @@ namespace Events.Application.Services
 
             try
             {
-                await _participantsRepository.AddAsync(entity);
+                await _participantsRepository.AddAsync(entity, cancellationToken);
             }
-            catch(DbUpdateException ex) when 
-                (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            catch(InvalidOperationException ex) when 
+                (ex.InnerException is NpgsqlException npgEx)
             {
                 throw new ClientException("A participant with such an email already exists", 400);
             }
@@ -73,19 +79,20 @@ namespace Events.Application.Services
             };
         }
 
-        public async Task<ServiceResponse<Participant>> RegisterParticipationAsync(Guid participantId, Guid eventId)
+        public async Task<ServiceResponse<Participant>> RegisterParticipationAsync(Guid participantId, Guid eventId,
+            CancellationToken cancellationToken = default)
         {
-            var participantEntity = await _participantsRepository.GetAsync(participantId);
+            var participantEntity = await _participantsRepository.GetAsync(participantId, cancellationToken);
 
             if (participantEntity is not null)
             {
-                var eventEntity = await _eventsRepository.GetAsync(eventId);
+                var eventEntity = await _eventsRepository.GetAsync(eventId, cancellationToken);
 
                 if (eventEntity is not null)
                 {
                     participantEntity.Event = eventEntity;
 
-                    await _participantsRepository.UpdateAsync(participantEntity);
+                    await _participantsRepository.UpdateAsync(participantEntity, cancellationToken);
 
                     Log.Information("Participation was successfully registered");
 
@@ -102,15 +109,15 @@ namespace Events.Application.Services
             throw new ClientException("Participant was not found", 400);
         }
 
-        public async Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id)
+        public async Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity = await _participantsRepository.GetAsync(id);
+            var entity = await _participantsRepository.GetAsync(id, cancellationToken);
 
             if (entity is not null)
             {
                 entity.Event = null;
 
-                await _participantsRepository.UpdateAsync(entity);
+                await _participantsRepository.UpdateAsync(entity, cancellationToken);
 
                 Log.Information("Participation was successfully canceled");
 
@@ -124,9 +131,9 @@ namespace Events.Application.Services
             throw new ClientException("Participant was not found", 400);
         }
 
-        public async Task<ServiceResponse<Participant>> GetByIdAsync(Guid id)
+        public async Task<ServiceResponse<Participant>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity = await _participantsRepository.GetAsync(id);
+            var entity = await _participantsRepository.GetAsync(id, cancellationToken);
 
             Log.Information("The participant has been successfully received");
 
@@ -137,7 +144,7 @@ namespace Events.Application.Services
             };
         }
 
-        public void ReportTheChanges(EventEntity entity)
+        public void ReportTheChanges(EventEntity entity, CancellationToken cancellationToken)
         {
             if (entity is not null)
             {
@@ -165,7 +172,7 @@ namespace Events.Application.Services
                         smtpClient.Send(mailMessage);
 
                         Log.Information("Mail has been successfully sended");
-                    });
+                    }, cancellationToken);
                 }
             }
         }

@@ -4,7 +4,7 @@ namespace Events.Application.Interfaces
 {
     public interface IAccountService
     {
-        ServiceResponse<AccountResponse> Login(ParticipantLoginRequest model);
-        Task<ServiceResponse<AccountResponse>> Register(ParticipantRegisterRequest model);
+        Task<ServiceResponse<AccountResponse>> LoginAsync(ParticipantLoginRequest model, CancellationToken cancellationToken = default);
+        Task<ServiceResponse<AccountResponse>> RegisterAsync(ParticipantRegisterRequest model, CancellationToken cancellationToken = default);
     }
 }

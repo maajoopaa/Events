@@ -6,11 +6,11 @@ namespace Events.Application.Interfaces
 {
     public interface IParticipantService
     {
-        Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id);
-        Task<ServiceResponse<Participant>> AddAsync(ParticipantRegisterRequest model);
-        ServiceResponse<ParticipantEntity> GetByEmailAsync(string email);
-        Task<ServiceResponse<Participant>> GetByIdAsync(Guid id);
-        Task<ServiceResponse<Participant>> RegisterParticipationAsync(Guid participantId, Guid eventId);
-        void ReportTheChanges(EventEntity entity);
+        Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<ServiceResponse<Participant>> AddAsync(ParticipantRegisterRequest model, CancellationToken cancellationToken = default);
+        ServiceResponse<ParticipantEntity> GetByEmail(string email);
+        Task<ServiceResponse<Participant>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<ServiceResponse<Participant>> RegisterParticipationAsync(Guid participantId, Guid eventId, CancellationToken cancellationToken = default);
+        void ReportTheChanges(EventEntity entity, CancellationToken cancellationToken);
     }
 }

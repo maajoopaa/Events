@@ -26,9 +26,9 @@ namespace Events.Application.Services
             _participantService = participantService;
         }
 
-        public ServiceResponse<List<Event>> GetAllAsync()
+        public ServiceResponse<List<Event>> GetAll()
         {
-            var entities = _eventsRepository.GetAllAsync()
+            var entities = _eventsRepository.GetAll()
                     .ToList();
 
             Log.Information("Events were successfully received");
@@ -40,9 +40,9 @@ namespace Events.Application.Services
             };
         }
 
-        public async Task<ServiceResponse<List<Participant>>> GetParticipantsAsync(Guid eventId)
+        public async Task<ServiceResponse<List<Participant>>> GetParticipantsAsync(Guid eventId, CancellationToken cancellationToken = default)
         {
-            var entity = await _eventsRepository.GetAsync(eventId);
+            var entity = await _eventsRepository.GetAsync(eventId, cancellationToken);
 
             if (entity is not null)
             {
@@ -58,9 +58,9 @@ namespace Events.Application.Services
             throw new ClientException("Event was not found", 400);
         }
 
-        public async Task<ServiceResponse<Event?>> GetByIdAsync(Guid id)
+        public async Task<ServiceResponse<Event?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity = await _eventsRepository.GetAsync(id);
+            var entity = await _eventsRepository.GetAsync(id, cancellationToken);
 
             Log.Information("The event has been successfully received");
 
@@ -71,9 +71,9 @@ namespace Events.Application.Services
             };
         }
 
-        public ServiceResponse<Event?> GetByTitleAsync(string title)
+        public ServiceResponse<Event?> GetByTitle(string title)
         {
-            var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAll()
                     .FirstOrDefault(x => x.Title.ToLower().Contains(title.ToLower()));
 
             Log.Information("The event has been successfully received");
@@ -85,9 +85,9 @@ namespace Events.Application.Services
             };
         }
 
-        public ServiceResponse<Event?> GetByDateAsync(DateTime date)
+        public ServiceResponse<Event?> GetByDate(DateTime date)
         {
-            var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAll()
                     .FirstOrDefault(x => x.HoldedAt == date);
 
             Log.Information("The event has been successfully received");
@@ -99,9 +99,9 @@ namespace Events.Application.Services
             };
         }
 
-        public ServiceResponse<Event?> GetByVenueAsync(string venue)
+        public ServiceResponse<Event?> GetByVenue(string venue)
         {
-            var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAll()
                     .FirstOrDefault(x => x.Venue.ToLower() == venue.ToLower());
 
             Log.Information("The event has been successfully received");
@@ -113,9 +113,9 @@ namespace Events.Application.Services
             };
         }
 
-        public ServiceResponse<Event?> GetByCategoryAsync(Category category)
+        public ServiceResponse<Event?> GetByCategory(Category category)
         {
-            var entity = _eventsRepository.GetAllAsync()
+            var entity = _eventsRepository.GetAll()
                     .FirstOrDefault(x => x.Category == category);
 
             Log.Information("The event has been successfully received");
@@ -127,9 +127,9 @@ namespace Events.Application.Services
             };
         }
 
-        public async Task<ServiceResponse<Event>> AddAsync(EventRequest model)
+        public async Task<ServiceResponse<Event>> AddAsync(EventRequest model, CancellationToken cancellationToken = default)
         {
-            _validator.ValidateAndThrow(model);
+            await _validator.ValidateAndThrowAsync(model, cancellationToken);
 
             var entity = new EventEntity
             {
@@ -142,7 +142,7 @@ namespace Events.Application.Services
                 Image = model.Image,
             };
 
-            await _eventsRepository.AddAsync(entity);
+            await _eventsRepository.AddAsync(entity, cancellationToken);
 
             Log.Information("The event has been successfully added");
 
@@ -153,11 +153,11 @@ namespace Events.Application.Services
             };
         }
 
-        public async Task<ServiceResponse<Event>> UpdateAsync(Guid id, EventRequest model)
+        public async Task<ServiceResponse<Event>> UpdateAsync(Guid id, EventRequest model, CancellationToken cancellationToken = default)
         {
-            _validator.ValidateAndThrow(model);
+            await _validator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var entity = await _eventsRepository.GetAsync(id);
+            var entity = await _eventsRepository.GetAsync(id, cancellationToken);
 
             if (entity is not null)
             {
@@ -169,11 +169,11 @@ namespace Events.Application.Services
                 entity.MaxCountOfParticipant = model.MaxCountOfParticipant;
                 entity.Image = model.Image;
 
-                await _eventsRepository.UpdateAsync(entity);
+                await _eventsRepository.UpdateAsync(entity, cancellationToken);
 
                 Log.Information("The event has been successfully updated");
 
-                _participantService.ReportTheChanges(entity);
+                _participantService.ReportTheChanges(entity, cancellationToken);
 
                 return new ServiceResponse<Event>
                 {
@@ -185,13 +185,13 @@ namespace Events.Application.Services
             throw new ClientException("Event was not found", 400);
         }
 
-        public async Task<ServiceResponse<Event>> DeleteAsync(Guid id)
+        public async Task<ServiceResponse<Event>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity = await _eventsRepository.GetAsync(id);
+            var entity = await _eventsRepository.GetAsync(id, cancellationToken);
 
             if (entity is not null)
             {
-                await _eventsRepository.DeleteAsync(entity);
+                await _eventsRepository.DeleteAsync(entity, cancellationToken);
 
                 Log.Information("The event has been successfully deleted");
 

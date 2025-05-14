@@ -17,17 +17,17 @@ namespace Events.API.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult LoginAsync([FromBody] ParticipantLoginRequest model)
+        public async Task<IActionResult> LoginAsync([FromBody] ParticipantLoginRequest model, CancellationToken cancellationToken)
         {
-            var response = _accountService.Login(model);
+            var response = await _accountService.LoginAsync(model, cancellationToken);
 
             return Ok(response.Data);
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync([FromBody] ParticipantRegisterRequest model)
+        public async Task<IActionResult> RegisterAsync([FromBody] ParticipantRegisterRequest model, CancellationToken cancellationToken)
         {
-            var response = await _accountService.Register(model);
+            var response = await _accountService.RegisterAsync(model, cancellationToken);
 
             return Ok(response.Data);
         }

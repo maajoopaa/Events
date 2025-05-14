@@ -11,28 +11,23 @@ namespace Events.Application.Services.AccountService
     public class AccountService : IAccountService
     {
         private readonly IParticipantService _participantService;
-        private readonly IValidator<ParticipantRegisterRequest> _regValidator;
         private readonly IValidator<ParticipantLoginRequest> _loginValidator;
         private readonly IMapper _mapper;
 
-        public AccountService(IParticipantService participantService, IValidator<ParticipantRegisterRequest> regValidator,
-            IValidator<ParticipantLoginRequest> loginValidator, IMapper mapper)
+        public AccountService(IParticipantService participantService, IValidator<ParticipantLoginRequest> loginValidator, IMapper mapper)
         {
             _participantService = participantService;
-            _regValidator = regValidator;
             _loginValidator = loginValidator;
             _mapper = mapper;
         }
 
-        public async Task<ServiceResponse<AccountResponse>> Register(ParticipantRegisterRequest model)
+        public async Task<ServiceResponse<AccountResponse>> RegisterAsync(ParticipantRegisterRequest model, CancellationToken cancellationToken = default)
         {
-            var result = _regValidator.Validate(model);
-
-            var response = await _participantService.AddAsync(model);
+            var response = await _participantService.AddAsync(model, cancellationToken);
 
             if (response.Success)
             {
-                return Login(new ParticipantLoginRequest
+                return await LoginAsync(new ParticipantLoginRequest
                 {
                     Email = model.Email,
                     Password = model.Password
@@ -42,9 +37,11 @@ namespace Events.Application.Services.AccountService
             throw new ClientException("Account with this email already exists", 400);
         }
 
-        public ServiceResponse<AccountResponse> Login(ParticipantLoginRequest model)
+        public async Task<ServiceResponse<AccountResponse>> LoginAsync(ParticipantLoginRequest model, CancellationToken cancellationToken = default)
         {
-            var response = _participantService.GetByEmailAsync(model.Email);
+            await _loginValidator.ValidateAndThrowAsync(model, cancellationToken);
+
+            var response = _participantService.GetByEmail(model.Email);
 
             if (response.Data is not null && PasswordHasher.Verify(model.Password, response.Data.PasswordHash))
             {

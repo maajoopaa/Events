@@ -18,81 +18,81 @@ namespace Events.API.Controllers
         }
 
         [HttpGet("list")]
-        public IActionResult GetAllAsync()
+        public IActionResult GetAll()
         {
-            var response = _eventService.GetAllAsync();
+            var response = _eventService.GetAll();
 
             return Ok(response.Data);
         }
 
         [HttpGet("{id:guid}/participants")]
-        public async Task<IActionResult> GetParticipantsAsync(Guid id)
+        public async Task<IActionResult> GetParticipantsAsync(Guid id, CancellationToken cancellationToken)
         {
-            var response = await _eventService.GetParticipantsAsync(id);
+            var response = await _eventService.GetParticipantsAsync(id, cancellationToken);
 
             return Ok(response.Data);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetByIdAsync(Guid id)
+        public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var response = await _eventService.GetByIdAsync(id);
+            var response = await _eventService.GetByIdAsync(id, cancellationToken);
 
             return Ok(response.Data);
         }
 
         [HttpGet("title/{title}")]
-        public IActionResult GetByTitleAsync(string title)
+        public IActionResult GetByTitle(string title)
         {
-            var response = _eventService.GetByTitleAsync(title);
+            var response = _eventService.GetByTitle(title);
 
             return Ok(response.Data);
         }
 
         [HttpGet("date/{date:datetime}")]
-        public IActionResult GetByTitleAsync(DateTime date)
+        public IActionResult GetByDate(DateTime date)
         {
-            var response = _eventService.GetByDateAsync(date);
+            var response = _eventService.GetByDate(date);
 
             return Ok(response.Data);
         }
 
         [HttpGet("venue/{venue}")]
-        public IActionResult GetByVenueAsync(string venue)
+        public IActionResult GetByVenue(string venue)
         {
-            var response = _eventService.GetByVenueAsync(venue);
+            var response = _eventService.GetByVenue(venue);
 
             return Ok(response.Data);
         }
 
         [HttpGet("category/{category:int}")]
-        public IActionResult GetByCategoryAsync(int category)
+        public IActionResult GetByCategory(int category)
         {
-            var response = _eventService.GetByCategoryAsync((Category)category);
+            var response = _eventService.GetByCategory((Category)category);
 
             return Ok(response.Data);
         }
 
         [HttpPost, Authorize]
-        public async Task<IActionResult> AddAsync([FromBody] EventRequest model)
+        public async Task<IActionResult> AddAsync([FromBody] EventRequest model, CancellationToken cancellationToken)
         {
-            var response = await _eventService.AddAsync(model);
+            var response = await _eventService.AddAsync(model, cancellationToken);
 
             return Ok(response.Data);
         }
 
         [HttpPut("{id:guid}"), Authorize]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] EventRequest model)
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] EventRequest model, CancellationToken cancellationToken)
         {
-            var response = await _eventService.UpdateAsync(id,model);
+            var response = await _eventService.UpdateAsync(id, model, cancellationToken);
 
             return Ok(response.Data);
         }
 
         [HttpDelete("{id:guid}"), Authorize]
-        public async Task<IActionResult> DeleteAsync(Guid id)
+        public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
-            var response = await _eventService.DeleteAsync(id);
+            var response = await _eventService.DeleteAsync(id, cancellationToken);
 
             return Ok(response.Data);
         }
