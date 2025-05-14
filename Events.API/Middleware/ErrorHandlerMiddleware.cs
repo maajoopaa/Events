@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -26,19 +27,27 @@ namespace Events.API.Middleware
             {
                 await _next(context);
             }
-            catch(ClientException ex)
+            catch (FluentValidation.ValidationException ex)
+            {
+                Log.Error("Validation error: {ex}", ex);
+                await HandleExceptionAsync(context, 400, ex.Message);
+            }
+            catch (ClientException ex)
             {
                 Log.Error("Client error: {ex}", ex);
-
-                await HandleExceptionAsync(context,ex.StatusCode,ex.Message);
-
+                await HandleExceptionAsync(context, ex.StatusCode, ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                Log.Information("The operation was canceled: {ex}", ex);
+                await HandleExceptionAsync(context, 499, "The operation was canceled");
             }
             catch (Exception ex)
             {
-                Log.Fatal("Server error: {ex}",ex);
-
-                await HandleExceptionAsync(context, 500, ex.Message);
+                Log.Fatal("Server error: {ex}", ex);
+                await HandleExceptionAsync(context, 500, "Internal server error");
             }
+
         }
 
         private async Task HandleExceptionAsync(HttpContext context, int statusCode, string message)
