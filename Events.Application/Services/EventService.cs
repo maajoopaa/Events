@@ -16,20 +16,26 @@ namespace Events.Application.Services
         private readonly IMapper _mapper;
         private readonly IValidator<EventRequest> _validator;
         private readonly IParticipantService _participantService;
+        private readonly IValidator<PaginationModel> _pageValidator;
 
         public EventService(IEventsRepository eventsRepository, IMapper mapper, IValidator<EventRequest> validator,
-            IParticipantService participantService)
+            IParticipantService participantService, IValidator<PaginationModel> pageValidator)
         {
             _eventsRepository = eventsRepository;
             _mapper = mapper;
             _validator = validator;
             _participantService = participantService;
+            _pageValidator = pageValidator;
         }
 
-        public ServiceResponse<List<Event>> GetAll()
+        public async Task<ServiceResponse<List<Event>>> GetAllAsync(PaginationModel model, CancellationToken cancellationToken)
         {
+            await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
+
             var entities = _eventsRepository.GetAll()
-                    .ToList();
+                .Skip((model.Page - 1)*model.PageSize)
+                .Take(model.PageSize)
+                .ToList();
 
             Log.Information("Events were successfully received");
 
@@ -71,59 +77,79 @@ namespace Events.Application.Services
             };
         }
 
-        public ServiceResponse<Event?> GetByTitle(string title)
+        public async Task<ServiceResponse<List<Event>>> GetByTitleAsync(string title, PaginationModel model, CancellationToken cancellationToken)
         {
-            var entity = _eventsRepository.GetAll()
-                    .FirstOrDefault(x => x.Title.ToLower().Contains(title.ToLower()));
+            await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            Log.Information("The event has been successfully received");
+            var entities = _eventsRepository.GetAll()
+                .Where(x => x.Title.ToLower().Contains(title.ToLower()))
+                .Skip((model.Page - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToList();
 
-            return new ServiceResponse<Event?>
+            Log.Information("The events has been successfully received");
+
+            return new ServiceResponse<List<Event>>
             {
                 Success = true,
-                Data = _mapper.Map<Event>(entity)
+                Data = _mapper.Map<List<Event>>(entities)
             };
         }
 
-        public ServiceResponse<Event?> GetByDate(DateTime date)
+        public async Task<ServiceResponse<List<Event>>> GetByDateAsync(DateTime date, PaginationModel model, CancellationToken cancellationToken)
         {
-            var entity = _eventsRepository.GetAll()
-                    .FirstOrDefault(x => x.HoldedAt == date);
+            await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            Log.Information("The event has been successfully received");
+            var entities = _eventsRepository.GetAll()
+                .Where(x => x.HoldedAt == date)
+                .Skip((model.Page - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToList();
 
-            return new ServiceResponse<Event?>
+            Log.Information("The events has been successfully received");
+
+            return new ServiceResponse<List<Event>>
             {
                 Success = true,
-                Data = _mapper.Map<Event>(entity)
+                Data = _mapper.Map<List<Event>>(entities)
             };
         }
 
-        public ServiceResponse<Event?> GetByVenue(string venue)
+        public async Task<ServiceResponse<List<Event>>> GetByVenueAsync(string venue, PaginationModel model, CancellationToken cancellationToken)
         {
-            var entity = _eventsRepository.GetAll()
-                    .FirstOrDefault(x => x.Venue.ToLower() == venue.ToLower());
+            await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            Log.Information("The event has been successfully received");
+            var entities = _eventsRepository.GetAll()
+                .Where(x => x.Venue.ToLower() == venue.ToLower())
+                .Skip((model.Page - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToList();
 
-            return new ServiceResponse<Event?>
+            Log.Information("The events has been successfully received");
+
+            return new ServiceResponse<List<Event>>
             {
                 Success = true,
-                Data = _mapper.Map<Event>(entity)
+                Data = _mapper.Map<List<Event>>(entities)
             };
         }
 
-        public ServiceResponse<Event?> GetByCategory(Category category)
+        public async Task<ServiceResponse<List<Event>>> GetByCategoryAsync(Category category, PaginationModel model, CancellationToken cancellationToken)
         {
-            var entity = _eventsRepository.GetAll()
-                    .FirstOrDefault(x => x.Category == category);
+            await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            Log.Information("The event has been successfully received");
+            var entities = _eventsRepository.GetAll()
+                .Where(x => x.Category == category)
+                .Skip((model.Page - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToList();
 
-            return new ServiceResponse<Event?>
+            Log.Information("The events has been successfully received");
+
+            return new ServiceResponse<List<Event>>
             {
                 Success = true,
-                Data = _mapper.Map<Event>(entity)
+                Data = _mapper.Map<List<Event>>(entities)
             };
         }
 
