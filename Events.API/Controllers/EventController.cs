@@ -17,10 +17,10 @@ namespace Events.API.Controllers
             _eventService = eventService;
         }
 
-        [HttpGet("list")]
-        public IActionResult GetAll()
+        [HttpPost("list")]
+        public async Task<IActionResult> GetAllAsync([FromBody] PaginationModel model, CancellationToken cancellationToken)
         {
-            var response = _eventService.GetAll();
+            var response = await _eventService.GetAllAsync(model, cancellationToken);
 
             return Ok(response.Data);
         }
@@ -41,34 +41,34 @@ namespace Events.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpGet("title/{title}")]
-        public IActionResult GetByTitle(string title)
+        [HttpPost("title/{title}")]
+        public async Task<IActionResult> GetByTitleAsync(string title, [FromBody] PaginationModel model, CancellationToken cancellationToken)
         {
-            var response = _eventService.GetByTitle(title);
+            var response = await _eventService.GetByTitleAsync(title, model,cancellationToken);
 
             return Ok(response.Data);
         }
 
-        [HttpGet("date/{date:datetime}")]
-        public IActionResult GetByDate(DateTime date)
+        [HttpPost("date/{date:datetime}")]
+        public async Task<IActionResult> GetByDateAsync(DateTime date, [FromBody] PaginationModel model, CancellationToken cancellationToken)
         {
-            var response = _eventService.GetByDate(date);
+            var response = await _eventService.GetByDateAsync(date, model, cancellationToken);
 
             return Ok(response.Data);
         }
 
-        [HttpGet("venue/{venue}")]
-        public IActionResult GetByVenue(string venue)
+        [HttpPost("venue/{venue}")]
+        public async Task<IActionResult> GetByVenueAsync(string venue, [FromBody] PaginationModel model, CancellationToken cancellationToken)
         {
-            var response = _eventService.GetByVenue(venue);
+            var response = await _eventService.GetByVenueAsync(venue, model, cancellationToken);
 
             return Ok(response.Data);
         }
 
-        [HttpGet("category/{category:int}")]
-        public IActionResult GetByCategory(int category)
+        [HttpPost("category/{category:int}")]
+        public async Task<IActionResult> GetByCategoryAsync(int category, [FromBody] PaginationModel model, CancellationToken cancellationToken)
         {
-            var response = _eventService.GetByCategory((Category)category);
+            var response = await _eventService.GetByCategoryAsync((Category)category, model, cancellationToken);
 
             return Ok(response.Data);
         }
