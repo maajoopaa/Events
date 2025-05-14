@@ -38,6 +38,7 @@ namespace Events.API
             services.AddTransient<IValidator<EventRequest>, EventRequestValidator>();
             services.AddTransient<IValidator<ParticipantLoginRequest>, ParticipantLoginRequestValidator>();
             services.AddTransient<IValidator<ParticipantRegisterRequest>, ParticipantRegisterRequestValidator>();
+            services.AddTransient<IValidator<PaginationModel>, PaginationModelValidator>();
         }
 
         public static void AddAuth(this IServiceCollection services)
