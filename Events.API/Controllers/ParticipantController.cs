@@ -15,7 +15,7 @@ namespace Events.API.Controllers
             _participantService = participantService;
         }
 
-        [HttpPatch("{id:guid}"), Authorize]
+        [HttpPatch("{id:guid}"), Authorize(Policy = "Over18")]
         public async Task<IActionResult> AbolitionParticipationAsync(Guid id, CancellationToken cancellationToken)
         {
             var response = await _participantService.AbolitionParticipationAsync(id,cancellationToken);
@@ -23,7 +23,7 @@ namespace Events.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPatch("{id:guid}/{eventId:guid}"), Authorize]
+        [HttpPatch("{id:guid}/{eventId:guid}"), Authorize(Policy = "Over18")]
         public async Task<IActionResult> RegisterParticipationAsync(Guid id, Guid eventId, CancellationToken cancellationToken)
         {
             var response = await _participantService.RegisterParticipationAsync(id, eventId, cancellationToken);

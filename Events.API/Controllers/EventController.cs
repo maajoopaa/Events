@@ -73,7 +73,7 @@ namespace Events.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPost, Authorize]
+        [HttpPost, Authorize(Policy = "Over18")]
         public async Task<IActionResult> AddAsync([FromBody] EventRequest model, CancellationToken cancellationToken)
         {
             var response = await _eventService.AddAsync(model, cancellationToken);
@@ -81,7 +81,7 @@ namespace Events.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPut("{id:guid}"), Authorize]
+        [HttpPut("{id:guid}"), Authorize(Policy = "Over18")]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] EventRequest model, CancellationToken cancellationToken)
         {
             var response = await _eventService.UpdateAsync(id, model, cancellationToken);
@@ -89,7 +89,7 @@ namespace Events.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpDelete("{id:guid}"), Authorize]
+        [HttpDelete("{id:guid}"), Authorize(Policy = "Over18")]
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             var response = await _eventService.DeleteAsync(id, cancellationToken);

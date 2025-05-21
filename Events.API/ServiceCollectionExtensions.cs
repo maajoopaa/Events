@@ -11,6 +11,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 
 namespace Events.API
@@ -43,7 +44,29 @@ namespace Events.API
 
         public static void AddAuth(this IServiceCollection services)
         {
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Over18", policy => policy.RequireAssertion(context =>
+                {
+                    var birthdayClaim = context.User.FindFirst(c => c.Type == ClaimTypes.DateOfBirth);
+
+                    if (birthdayClaim == null || !DateTime.TryParse(birthdayClaim.Value, out var birthday))
+                    {
+                        return false;
+                    }
+
+                    var today = DateTime.Today;
+                    var age = today.Year - birthday.Year;
+                    if (birthday > today.AddYears(-age)) age--;
+
+                    if (age >= 18)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }));
+            });
             services.AddAuthentication()
                 .AddJwtBearer(options =>
                 {
