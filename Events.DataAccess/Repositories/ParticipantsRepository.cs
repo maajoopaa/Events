@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Events.DataAccess;
 using Events.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Linq.Expressions;
 
 namespace Events.DataAccess.Repositories
 {
@@ -34,10 +35,17 @@ namespace Events.DataAccess.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public IQueryable<ParticipantEntity> GetAll()
+        public async Task<List<ParticipantEntity>> GetAllAsync(Expression<Func<ParticipantEntity,bool>> expression, int page, int pageSize, 
+            CancellationToken cancellationToken=default)
         {
-            return _context.Participants
-                .AsNoTracking();
+            var result = await _context.Participants
+                .Where(expression)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return result;
+                
         }
 
         public async Task<ParticipantEntity?> GetAsync(Guid id, CancellationToken cancellationToken = default)
@@ -45,6 +53,13 @@ namespace Events.DataAccess.Repositories
             return await _context.Participants
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        }
+
+        public async Task<ParticipantEntity?> GetAsync(string email, CancellationToken cancellationToken = default)
+        {
+            return await _context.Participants
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
         }
 
         public async Task UpdateAsync(ParticipantEntity entity, CancellationToken cancellationToken = default)

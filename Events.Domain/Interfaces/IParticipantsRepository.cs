@@ -8,5 +8,8 @@ using System.Threading.Tasks;
 
 namespace Events.Domain.Interfaces
 {
-    public interface IParticipantsRepository : IRepository<ParticipantEntity> { }
+    public interface IParticipantsRepository : IRepository<ParticipantEntity>
+    {
+        public Task<ParticipantEntity?> GetAsync(string email, CancellationToken cancellationToken = default);
+    }
 }

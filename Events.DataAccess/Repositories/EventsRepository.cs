@@ -1,6 +1,7 @@
 ﻿using Events.Domain.Entities;
 using Events.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Events.DataAccess.Repositories
 {
@@ -27,10 +28,17 @@ namespace Events.DataAccess.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public IQueryable<EventEntity> GetAll()
+        public async Task<List<EventEntity>> GetAllAsync(Expression<Func<EventEntity, bool>> expression, int page, int pageSize,
+            CancellationToken cancellationToken = default)
         {
-            return _context.Events
-                .AsNoTracking();
+            var result = await _context.Events
+                .Where(expression)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return result;
+
         }
 
         public async Task<EventEntity?> GetAsync(Guid id, CancellationToken cancellationToken = default)

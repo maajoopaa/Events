@@ -8,7 +8,7 @@ namespace Events.Application.Interfaces
     {
         Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id, CancellationToken cancellationToken = default);
         Task<ServiceResponse<Participant>> AddAsync(ParticipantRegisterRequest model, CancellationToken cancellationToken = default);
-        ServiceResponse<ParticipantEntity> GetByEmail(string email);
+        Task<ServiceResponse<ParticipantEntity>> GetByEmailAsync(string email, CancellationToken cancellationToken);
         Task<ServiceResponse<Participant>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<ServiceResponse<Participant>> RegisterParticipationAsync(Guid participantId, Guid eventId, CancellationToken cancellationToken = default);
         void ReportTheChanges(EventEntity entity, CancellationToken cancellationToken);

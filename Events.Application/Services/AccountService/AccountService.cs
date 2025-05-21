@@ -41,7 +41,7 @@ namespace Events.Application.Services.AccountService
         {
             await _loginValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var response = _participantService.GetByEmail(model.Email);
+            var response = await _participantService.GetByEmailAsync(model.Email, cancellationToken);
 
             if (response.Data is not null && PasswordHasher.Verify(model.Password, response.Data.PasswordHash))
             {

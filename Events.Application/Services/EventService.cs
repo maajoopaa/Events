@@ -7,6 +7,7 @@ using Events.Application.Interfaces;
 using Events.Domain.Interfaces;
 using Serilog;
 using Events.Application.Exceptions;
+using System.Linq.Expressions;
 
 namespace Events.Application.Services
 {
@@ -32,10 +33,7 @@ namespace Events.Application.Services
         {
             await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var entities = _eventsRepository.GetAll()
-                .Skip((model.Page - 1)*model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
+            var entities = _eventsRepository.GetAllAsync(x => true, model.Page, model.PageSize, cancellationToken);
 
             Log.Information("Events were successfully received");
 
@@ -81,11 +79,8 @@ namespace Events.Application.Services
         {
             await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var entities = _eventsRepository.GetAll()
-                .Where(x => x.Title.ToLower().Contains(title.ToLower()))
-                .Skip((model.Page - 1) * model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
+            var entities = _eventsRepository.GetAllAsync(x => x.Title.ToLower().Contains(title.ToLower()), model.Page, model.PageSize,
+                cancellationToken);
 
             Log.Information("The events has been successfully received");
 
@@ -100,11 +95,7 @@ namespace Events.Application.Services
         {
             await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var entities = _eventsRepository.GetAll()
-                .Where(x => x.HoldedAt == date)
-                .Skip((model.Page - 1) * model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
+            var entities = _eventsRepository.GetAllAsync(x => x.HoldedAt == date, model.Page, model.PageSize, cancellationToken);
 
             Log.Information("The events has been successfully received");
 
@@ -119,11 +110,7 @@ namespace Events.Application.Services
         {
             await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var entities = _eventsRepository.GetAll()
-                .Where(x => x.Venue.ToLower() == venue.ToLower())
-                .Skip((model.Page - 1) * model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
+            var entities = _eventsRepository.GetAllAsync(x => x.Venue.ToLower() == venue.ToLower(), model.Page, model.PageSize, cancellationToken);
 
             Log.Information("The events has been successfully received");
 
@@ -138,11 +125,7 @@ namespace Events.Application.Services
         {
             await _pageValidator.ValidateAndThrowAsync(model, cancellationToken);
 
-            var entities = _eventsRepository.GetAll()
-                .Where(x => x.Category == category)
-                .Skip((model.Page - 1) * model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
+            var entities = _eventsRepository.GetAllAsync(x => x.Category == category, model.Page, model.PageSize, cancellationToken);
 
             Log.Information("The events has been successfully received");
 

@@ -32,10 +32,9 @@ namespace Events.Application.Services
             _regValidator = regValidator;
         }
 
-        public ServiceResponse<ParticipantEntity> GetByEmail(string email)
+        public async Task<ServiceResponse<ParticipantEntity>> GetByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            var entity = _participantsRepository.GetAll()
-                    .FirstOrDefault(x => x.Email == email);
+            var entity = await _participantsRepository.GetAsync(email, cancellationToken);
 
             Log.Information("The participant has been successfully received");
 
