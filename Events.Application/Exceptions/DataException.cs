@@ -6,16 +6,14 @@ using System.Threading.Tasks;
 
 namespace Events.Application.Exceptions
 {
-    public class ClientException : Exception
+    public class DataException : Exception
     {
 
-        public ClientException(string message, int statusCode)
+        public DataException(string message, int statusCode)
             : base(message)
         {
-            Message = message;
             StatusCode = statusCode;
         }
-        public string Message { get; set; }
 
         public int StatusCode { get; set; }
     }
