@@ -32,15 +32,25 @@ namespace Events.API.Middleware
                 Log.Error("Validation error: {ex}", ex);
                 await HandleExceptionAsync(context, 400, ex.Message);
             }
-            catch (ClientException ex)
+            catch (DataException ex)
             {
-                Log.Error("Client error: {ex}", ex);
+                Log.Error("Data error: {ex}", ex);
                 await HandleExceptionAsync(context, ex.StatusCode, ex.Message);
             }
             catch (OperationCanceledException ex)
             {
                 Log.Information("The operation was canceled: {ex}", ex);
                 await HandleExceptionAsync(context, 499, "The operation was canceled");
+            }
+            catch(NotFoundException ex)
+            {
+                Log.Error("Not found: {ex}", ex);
+                await HandleExceptionAsync(context, ex.StatusCode, ex.Message);
+            }
+            catch (ConflictException ex)
+            {
+                Log.Error("Conflict: {ex}", ex);
+                await HandleExceptionAsync(context, ex.StatusCode, ex.Message);
             }
             catch (Exception ex)
             {
