@@ -18,6 +18,7 @@ namespace Events.Application.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, participant.Email),
+                new Claim(ClaimTypes.DateOfBirth, participant.DateOfBirth.ToString())
             };
 
             var jwt = new JwtSecurityToken(
