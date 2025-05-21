@@ -34,7 +34,7 @@ namespace Events.Application.Services.AccountService
                 });
             }
 
-            throw new ClientException("Account with this email already exists", 400);
+            throw new DataException("Account with this email already exists", 400);
         }
 
         public async Task<ServiceResponse<AccountResponse>> LoginAsync(ParticipantLoginRequest model, CancellationToken cancellationToken = default)
@@ -62,7 +62,7 @@ namespace Events.Application.Services.AccountService
                 };
             }
 
-            throw new ClientException("Incorrect email or password", 400);
+            throw new DataException("Incorrect email or password", 400);
         }
     }
 }

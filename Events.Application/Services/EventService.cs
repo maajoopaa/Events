@@ -59,16 +59,21 @@ namespace Events.Application.Services
                 };
             }
 
-            throw new ClientException("Event was not found", 400);
+            throw new NotFoundException("Event was not found", 404);
         }
 
-        public async Task<ServiceResponse<Event?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<ServiceResponse<Event>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _eventsRepository.GetAsync(id, cancellationToken);
 
+            if(entity is null)
+            {
+                throw new NotFoundException("Event was not found", 404);
+            }
+
             Log.Information("The event has been successfully received");
 
-            return new ServiceResponse<Event?>
+            return new ServiceResponse<Event>
             {
                 Success = true,
                 Data = _mapper.Map<Event>(entity)
@@ -191,7 +196,7 @@ namespace Events.Application.Services
                 };
             }
 
-            throw new ClientException("Event was not found", 400);
+            throw new NotFoundException("Event was not found", 404);
         }
 
         public async Task<ServiceResponse<Event>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -211,7 +216,7 @@ namespace Events.Application.Services
                 };
             }
 
-            throw new ClientException("Event was not found", 400);
+            throw new NotFoundException("Event was not found", 404);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Events.Application.Interfaces
         Task<ServiceResponse<List<Event>>> GetAllAsync(PaginationModel model, CancellationToken cancellationToken);
         Task<ServiceResponse<List<Event>>> GetByCategoryAsync(Category category, PaginationModel model, CancellationToken cancellationToken);
         Task<ServiceResponse<List<Event>>> GetByDateAsync(DateTime date, PaginationModel model, CancellationToken cancellationToken);
-        Task<ServiceResponse<Event?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<ServiceResponse<Event>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<ServiceResponse<List<Event>>> GetByTitleAsync(string title, PaginationModel model, CancellationToken cancellationToken);
         Task<ServiceResponse<List<Event>>> GetByVenueAsync(string venue, PaginationModel model, CancellationToken cancellationToken);
         Task<ServiceResponse<List<Participant>>> GetParticipantsAsync(Guid eventId, CancellationToken cancellationToken = default);

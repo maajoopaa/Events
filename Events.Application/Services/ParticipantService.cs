@@ -36,6 +36,11 @@ namespace Events.Application.Services
         {
             var entity = await _participantsRepository.GetAsync(email, cancellationToken);
 
+            if(entity is null)
+            {
+                throw new NotFoundException("Participant was not found", 404);
+            }
+
             Log.Information("The participant has been successfully received");
 
             return new ServiceResponse<ParticipantEntity>
@@ -66,7 +71,7 @@ namespace Events.Application.Services
             catch(InvalidOperationException ex) when 
                 (ex.InnerException is NpgsqlException npgEx)
             {
-                throw new ClientException("A participant with such an email already exists", 400);
+                throw new ConflictException("A participant with such an email already exists", 409);
             }
 
             Log.Information("The participant has been successfully added");
@@ -102,10 +107,10 @@ namespace Events.Application.Services
                     };
                 }
 
-                throw new ClientException("Event was not found", 400);
+                throw new NotFoundException("Event was not found", 404);
             }
 
-            throw new ClientException("Participant was not found", 400);
+            throw new NotFoundException("Participant was not found", 404);
         }
 
         public async Task<ServiceResponse<Participant>> AbolitionParticipationAsync(Guid id, CancellationToken cancellationToken = default)
@@ -127,12 +132,17 @@ namespace Events.Application.Services
                 };
             }
 
-            throw new ClientException("Participant was not found", 400);
+            throw new NotFoundException("Participant was not found", 404);
         }
 
         public async Task<ServiceResponse<Participant>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _participantsRepository.GetAsync(id, cancellationToken);
+
+            if(entity is null)
+            {
+                throw new NotFoundException("Participant was not found", 404);
+            }
 
             Log.Information("The participant has been successfully received");
 
