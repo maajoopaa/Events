@@ -1,5 +1,6 @@
 ﻿using Events.Domain.Entities;
 using Events.Domain.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Events.Application.Models
 {
@@ -17,6 +18,6 @@ namespace Events.Application.Models
 
         public int MaxCountOfParticipant { get; set; } = 0;
 
-        public string? Image { get; set; }
+        public IFormFile Image { get; set; }
     }
 }

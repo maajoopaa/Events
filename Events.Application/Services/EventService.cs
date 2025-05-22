@@ -18,15 +18,17 @@ namespace Events.Application.Services
         private readonly IValidator<EventRequest> _validator;
         private readonly IParticipantService _participantService;
         private readonly IValidator<PaginationModel> _pageValidator;
+        private readonly IImageService _imageService;
 
         public EventService(IEventsRepository eventsRepository, IMapper mapper, IValidator<EventRequest> validator,
-            IParticipantService participantService, IValidator<PaginationModel> pageValidator)
+            IParticipantService participantService, IValidator<PaginationModel> pageValidator, IImageService imageService)
         {
             _eventsRepository = eventsRepository;
             _mapper = mapper;
             _validator = validator;
             _participantService = participantService;
             _pageValidator = pageValidator;
+            _imageService = imageService;
         }
 
         public async Task<ServiceResponse<List<Event>>> GetAllAsync(PaginationModel model, CancellationToken cancellationToken)
@@ -145,6 +147,8 @@ namespace Events.Application.Services
         {
             await _validator.ValidateAndThrowAsync(model, cancellationToken);
 
+            var imagePath = model.Image.Length > 0 ? await _imageService.SaveImageAsync(model.Image, cancellationToken) : null;
+
             var entity = new EventEntity
             {
                 Title = model.Title,
@@ -153,7 +157,7 @@ namespace Events.Application.Services
                 Venue = model.Venue,
                 Category = model.Category,
                 MaxCountOfParticipant = model.MaxCountOfParticipant,
-                Image = model.Image,
+                ImageUrl = imagePath
             };
 
             await _eventsRepository.AddAsync(entity, cancellationToken);
@@ -175,13 +179,20 @@ namespace Events.Application.Services
 
             if (entity is not null)
             {
+                if (!string.IsNullOrEmpty(entity.ImageUrl))
+                {
+                    _imageService.DeleteImage(entity.ImageUrl);
+                }
+
+                var imagePath = model.Image.Length > 0 ? await _imageService.SaveImageAsync(model.Image, cancellationToken) : null;
+
                 entity.Title = model.Title;
                 entity.Description = model.Description;
                 entity.HoldedAt = model.HoldedAt;
                 entity.Venue = model.Venue;
                 entity.Category = model.Category;
                 entity.MaxCountOfParticipant = model.MaxCountOfParticipant;
-                entity.Image = model.Image;
+                entity.ImageUrl = imagePath;
 
                 await _eventsRepository.UpdateAsync(entity, cancellationToken);
 
@@ -205,6 +216,11 @@ namespace Events.Application.Services
 
             if (entity is not null)
             {
+                if (!string.IsNullOrEmpty(entity.ImageUrl))
+                {
+                    _imageService.DeleteImage(entity.ImageUrl);
+                }
+
                 await _eventsRepository.DeleteAsync(entity, cancellationToken);
 
                 Log.Information("The event has been successfully deleted");

@@ -25,6 +25,6 @@ namespace Events.Domain.Entities
 
         public ICollection<ParticipantEntity> Participants { get; set; } = [];
 
-        public string? Image { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

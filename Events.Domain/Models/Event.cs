@@ -13,7 +13,7 @@
             Category = category;
             MaxCountOfParticipant = maxCountOfParticipant;
             Participants = participants;
-            Image = image;
+            ImageUrl = image;
         }
 
         public Guid Id { get; }
@@ -32,6 +32,6 @@
 
         public List<Participant> Participants { get; }
 
-        public string? Image { get; }
+        public string? ImageUrl { get; }
     }
 }

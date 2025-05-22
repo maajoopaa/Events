@@ -19,7 +19,7 @@ namespace Events.Application
                     src.Category,
                     src.MaxCountOfParticipant,
                     context.Mapper.Map<List<Participant>>(src.Participants),
-                    src.Image
+                    src.ImageUrl
                     ));
 
             CreateMap<ParticipantEntity, Participant>();
