@@ -12,61 +12,16 @@ using System.Linq.Expressions;
 
 namespace Events.DataAccess.Repositories
 {
-    public class ParticipantsRepository : IParticipantsRepository
+    public class ParticipantsRepository : BaseRepository<ParticipantEntity>, IParticipantsRepository
     {
-        private readonly EventsDbContext _context;
-
         public ParticipantsRepository(EventsDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task AddAsync(ParticipantEntity entity, CancellationToken cancellationToken = default)
-        {
-            await _context.Participants.AddAsync(entity, cancellationToken);
-
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task DeleteAsync(ParticipantEntity entity, CancellationToken cancellationToken = default)
-        {
-            _context.Participants.Remove(entity);
-
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task<List<ParticipantEntity>> GetAllAsync(Expression<Func<ParticipantEntity,bool>> expression, int page, int pageSize, 
-            CancellationToken cancellationToken=default)
-        {
-            var result = await _context.Participants
-                .Where(expression)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return result;
-                
-        }
-
-        public async Task<ParticipantEntity?> GetAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Participants
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        }
+            : base(context) { }
 
         public async Task<ParticipantEntity?> GetAsync(string email, CancellationToken cancellationToken = default)
         {
             return await _context.Participants
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
-        }
-
-        public async Task UpdateAsync(ParticipantEntity entity, CancellationToken cancellationToken = default)
-        {
-            _context.Participants.Update(entity);
-
-            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }
